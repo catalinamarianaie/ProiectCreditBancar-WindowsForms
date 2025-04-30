@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormCerere));
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
@@ -288,11 +287,11 @@
             comboMoneda.Size = new Size(295, 23);
             comboMoneda.TabIndex = 20;
             // 
-            // Form1
+            // FormCerere
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImage = Properties.Resources.CerereCredit;
             ClientSize = new Size(800, 586);
             Controls.Add(comboMoneda);
             Controls.Add(label9);
@@ -314,7 +313,7 @@
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
-            Name = "Form1";
+            Name = "FormCerere";
             Text = "Form1";
             Load += Form1_Load;
             ResumeLayout(false);

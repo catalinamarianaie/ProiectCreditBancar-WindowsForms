@@ -308,7 +308,7 @@ namespace Proiect
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ActiveBorder;
-            //BackgroundImage = (Image)Resources.ResourceManager.GetObject("$this.BackgroundImage");
+            BackgroundImage = Resources.CerereCredit;
             ClientSize = new Size(799, 576);
             Controls.Add(tabControl1);
             Name = "FormAdmin";

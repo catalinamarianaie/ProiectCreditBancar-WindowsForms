@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormCreareCont));
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
@@ -132,6 +131,7 @@
             // 
             txtNume.BackColor = SystemColors.WindowFrame;
             txtNume.BorderStyle = BorderStyle.FixedSingle;
+            txtNume.ForeColor = SystemColors.Window;
             txtNume.Location = new Point(289, 175);
             txtNume.Name = "txtNume";
             txtNume.Size = new Size(335, 23);
@@ -141,6 +141,7 @@
             // 
             txtPrenume.BackColor = SystemColors.WindowFrame;
             txtPrenume.BorderStyle = BorderStyle.FixedSingle;
+            txtPrenume.ForeColor = SystemColors.Window;
             txtPrenume.Location = new Point(289, 210);
             txtPrenume.Name = "txtPrenume";
             txtPrenume.Size = new Size(335, 23);
@@ -150,6 +151,7 @@
             // 
             txtVarsta.BackColor = SystemColors.WindowFrame;
             txtVarsta.BorderStyle = BorderStyle.FixedSingle;
+            txtVarsta.ForeColor = SystemColors.Window;
             txtVarsta.Location = new Point(289, 245);
             txtVarsta.Name = "txtVarsta";
             txtVarsta.Size = new Size(335, 23);
@@ -159,6 +161,7 @@
             // 
             txtUsername.BackColor = SystemColors.WindowFrame;
             txtUsername.BorderStyle = BorderStyle.FixedSingle;
+            txtUsername.ForeColor = SystemColors.Window;
             txtUsername.Location = new Point(289, 315);
             txtUsername.Name = "txtUsername";
             txtUsername.Size = new Size(335, 23);
@@ -168,6 +171,7 @@
             // 
             txtParola.BackColor = SystemColors.WindowFrame;
             txtParola.BorderStyle = BorderStyle.FixedSingle;
+            txtParola.ForeColor = SystemColors.Window;
             txtParola.Location = new Point(289, 351);
             txtParola.Name = "txtParola";
             txtParola.Size = new Size(335, 23);
@@ -189,7 +193,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
+            BackgroundImage = Properties.Resources.CreareCont;
             ClientSize = new Size(800, 585);
             Controls.Add(cmbTipCont);
             Controls.Add(txtParola);
