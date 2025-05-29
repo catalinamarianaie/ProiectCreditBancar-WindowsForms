@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SQLite;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -40,11 +41,11 @@ namespace Proiect
             {
                 using (StreamWriter sw = new StreamWriter(saveFileDialog.FileName, false, Encoding.UTF8))
                 {
-                    // Scrie anteturile
+                    
                     var header = string.Join(",", dataGridView1.Columns.Cast<DataGridViewColumn>().Select(c => c.HeaderText));
                     sw.WriteLine(header);
 
-                    // Scrie fiecare rând
+                    
                     foreach (DataGridViewRow row in dataGridView1.Rows)
                     {
                         if (!row.IsNewRow)
@@ -76,13 +77,13 @@ namespace Proiect
 
             DataTable dt = new DataTable();
 
-            // Citim antetul
+            
             for (int i = 1; i <= worksheet.UsedRange.Columns.Count; i++)
             {
                 dt.Columns.Add(worksheet.Cells[1, i].Value?.ToString() ?? $"Coloana{i}");
             }
 
-            // Citim toate datele
+            
             for (int row = 2; row <= worksheet.UsedRange.Rows.Count; row++)
             {
                 DataRow dataRow = dt.NewRow();
@@ -143,32 +144,33 @@ namespace Proiect
 
         private void button6_Click(object sender, EventArgs e)
         {
-            string caleFisier = "conturi.csv";
+            string connString = "Data Source=utilizatori.db;Version=3;";
 
-            if (!File.Exists(caleFisier))
-            {
-                MessageBox.Show("Fișierul conturi.csv nu există!", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            var lines = File.ReadAllLines(caleFisier);
             dataGridViewConturi.Rows.Clear();
             dataGridViewConturi.Columns.Clear();
 
-            dataGridViewConturi.Columns.Add("Nume", "Nume");
-            dataGridViewConturi.Columns.Add("Prenume", "Prenume");
-            dataGridViewConturi.Columns.Add("Varsta", "Vârstă");
             dataGridViewConturi.Columns.Add("TipCont", "Tip Cont");
             dataGridViewConturi.Columns.Add("Username", "Username");
             dataGridViewConturi.Columns.Add("Parola", "Parolă");
 
-            foreach (var line in lines)
+            using (var conn = new SQLiteConnection(connString))
             {
-                var values = line.Split(',');
-                if (values.Length == 6)
-                    dataGridViewConturi.Rows.Add(values);
+                conn.Open();
+                string query = "SELECT TipCont, Username, Parola FROM Utilizatori";
+                var cmd = new SQLiteCommand(query, conn);
+                var reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string tip = reader["TipCont"].ToString();
+                    string user = reader["Username"].ToString();
+                    string parola = reader["Parola"].ToString();
+
+                    dataGridViewConturi.Rows.Add(tip, user, parola);
+                }
             }
         }
+
 
         private void button4_Click(object sender, EventArgs e)
         {
@@ -178,17 +180,32 @@ namespace Proiect
                 return;
             }
 
-            var username = dataGridViewConturi.SelectedRows[0].Cells["Username"].Value.ToString();
+            string username = dataGridViewConturi.SelectedRows[0].Cells["Username"].Value.ToString();
 
-            
-            string caleFisier = "conturi.csv";
-            var linii = File.ReadAllLines(caleFisier).ToList();
-            linii = linii.Where(l => !l.Contains(username)).ToList();
-            File.WriteAllLines(caleFisier, linii);
+            DialogResult result = MessageBox.Show($"Ești sigur că vrei să ștergi contul '{username}'?",
+                                                  "Confirmare ștergere",
+                                                  MessageBoxButtons.YesNo,
+                                                  MessageBoxIcon.Question);
 
-            
-            dataGridViewConturi.Rows.RemoveAt(dataGridViewConturi.SelectedRows[0].Index);
+            if (result == DialogResult.Yes)
+            {
+                string connString = "Data Source=utilizatori.db;Version=3;";
+                using (var conn = new SQLiteConnection(connString))
+                {
+                    conn.Open();
+                    string deleteQuery = "DELETE FROM Utilizatori WHERE Username = @username";
+                    var cmd = new SQLiteCommand(deleteQuery, conn);
+                    cmd.Parameters.AddWithValue("@username", username);
+                    cmd.ExecuteNonQuery();
+                }
+
+                // Ștergem și din DataGridView
+                dataGridViewConturi.Rows.RemoveAt(dataGridViewConturi.SelectedRows[0].Index);
+
+                MessageBox.Show("Cont șters cu succes!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
+
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -196,6 +213,11 @@ namespace Proiect
             creareCont.ShowDialog();
 
             button6_Click(sender, e);
+        }
+
+        private void dataGridViewConturi_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 

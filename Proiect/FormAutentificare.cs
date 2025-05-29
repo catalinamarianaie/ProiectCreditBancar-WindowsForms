@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.SQLite;
+using System.IO;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Proiect
 {
@@ -16,57 +10,76 @@ namespace Proiect
         public FormAutentificare()
         {
             InitializeComponent();
+            CreeazaBazaDacaNuExista();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-          
             FormCreareCont creareCont = new FormCreareCont();
-            creareCont.ShowDialog(); 
-        
-
+            creareCont.ShowDialog();
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
             string username = txtUsername.Text.Trim();
             string parola = txtParola.Text.Trim();
-            string caleFisier = "conturi.csv";
 
-            if (!File.Exists(caleFisier))
+            string connString = "Data Source=utilizatori.db;Version=3;";
+            using (var conn = new SQLiteConnection(connString))
             {
-                MessageBox.Show("Nu există conturi salvate.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+                conn.Open();
+                string query = "SELECT TipCont FROM Utilizatori WHERE Username = @u AND Parola = @p";
+                var cmd = new SQLiteCommand(query, conn);
+                cmd.Parameters.AddWithValue("@u", username);
+                cmd.Parameters.AddWithValue("@p", parola);
 
-            var linii = File.ReadAllLines(caleFisier);
-            foreach (var linie in linii)
-            {
-                var date = linie.Split(',');
-                if (date.Length >= 6 && date[4] == username && date[5] == parola)
+                var result = cmd.ExecuteScalar();
+
+                if (result != null)
                 {
-                    string tipCont = date[3];
+                    string tipCont = result.ToString();
                     MessageBox.Show("Autentificare reușită!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                    this.Hide(); 
+                    this.Hide();
 
                     if (tipCont.ToLower() == "admin")
                     {
-                        FormAdmin adminForm = new FormAdmin();
-                        adminForm.ShowDialog();
+                        new FormAdmin().ShowDialog();
                     }
                     else
                     {
-                        FormCerere cerereForm = new FormCerere();
-                        cerereForm.ShowDialog();
+                        new FormCerere().ShowDialog();
                     }
 
-                    this.Show(); 
-                    return;
+                    this.Show();
+                }
+                else
+                {
+                    MessageBox.Show("Username sau parolă incorectă.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
 
-            MessageBox.Show("Username sau parolă incorectă.", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        private void CreeazaBazaDacaNuExista()
+        {
+            string path = "utilizatori.db";
+            if (!File.Exists(path))
+            {
+                SQLiteConnection.CreateFile(path);
+            }
+
+            string connString = $"Data Source={path};Version=3;";
+            using (var conn = new SQLiteConnection(connString))
+            {
+                conn.Open();
+                string query = @"CREATE TABLE IF NOT EXISTS Utilizatori (
+                                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                    Username TEXT NOT NULL UNIQUE,
+                                    Parola TEXT NOT NULL,
+                                    TipCont TEXT
+                                )";
+                var cmd = new SQLiteCommand(query, conn);
+                cmd.ExecuteNonQuery();
+            }
         }
     }
 }

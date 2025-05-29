@@ -302,6 +302,7 @@ namespace Proiect
             dataGridViewConturi.Name = "dataGridViewConturi";
             dataGridViewConturi.Size = new Size(642, 348);
             dataGridViewConturi.TabIndex = 0;
+            dataGridViewConturi.CellContentClick += dataGridViewConturi_CellContentClick;
             // 
             // FormAdmin
             // 

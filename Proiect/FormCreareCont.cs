@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.SQLite;
 using System.Windows.Forms;
 
 namespace Proiect
 {
     public partial class FormCreareCont : Form
     {
-        private string caleFisier = "conturi.csv";
         public FormCreareCont()
         {
             InitializeComponent();
@@ -20,17 +13,12 @@ namespace Proiect
             cmbTipCont.Items.Add("utilizator");
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             string nume = txtNume.Text.Trim();
             string prenume = txtPrenume.Text.Trim();
             string varsta = txtVarsta.Text.Trim();
-            string tipCont = cmbTipCont.Text.Trim(); 
+            string tipCont = cmbTipCont.Text.Trim();
             string username = txtUsername.Text.Trim();
             string parola = txtParola.Text.Trim();
 
@@ -42,32 +30,46 @@ namespace Proiect
                 return;
             }
 
-            if (File.Exists(caleFisier))
+            string connString = "Data Source=utilizatori.db;Version=3;";
+            using (var conn = new SQLiteConnection(connString))
             {
-                var linii = File.ReadAllLines(caleFisier);
-                foreach (var linie in linii)
+                conn.Open();
+
+                
+                string checkQuery = "SELECT COUNT(*) FROM Utilizatori WHERE Username = @u";
+                var checkCmd = new SQLiteCommand(checkQuery, conn);
+                checkCmd.Parameters.AddWithValue("@u", username);
+
+                int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                if (count > 0)
                 {
-                    var date = linie.Split(',');
-                    if (date.Length >= 5 && date[4] == username)
-                    {
-                        MessageBox.Show("Username-ul există deja!", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                    MessageBox.Show("Username-ul există deja!", "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Inserăm contul
+                string insertQuery = "INSERT INTO Utilizatori (Username, Parola, TipCont) VALUES (@u, @p, @t)";
+                var insertCmd = new SQLiteCommand(insertQuery, conn);
+                insertCmd.Parameters.AddWithValue("@u", username);
+                insertCmd.Parameters.AddWithValue("@p", parola);
+                insertCmd.Parameters.AddWithValue("@t", tipCont);
+
+                try
+                {
+                    insertCmd.ExecuteNonQuery();
+                    MessageBox.Show("Cont creat cu succes!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Eroare la salvare: " + ex.Message, "Eroare", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
-
-            string linieNoua = $"{nume},{prenume},{varsta},{tipCont},{username},{parola}";
-            File.AppendAllText(caleFisier, linieNoua + Environment.NewLine);
-
-            MessageBox.Show("Cont creat cu succes!", "Succes", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            this.Close(); 
         }
 
         private void cmbTipCont_SelectedIndexChanged(object sender, EventArgs e)
         {
-           
-                
+            
         }
-}
+    }
 }
